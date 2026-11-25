@@ -1,0 +1,175 @@
+/* ---- Spec: change values here, nowhere else ---- */
+:root {
+  --paper: #f3f0e8;
+  --ink: #111;
+  --accent: #d4281c;
+  --rule: 1px;           /* all rules; the masthead band is the only heavy element */
+  --unit: 1rem;          /* base spacing unit; everything is a multiple */
+  --gutter: 1.5rem;
+  --measure: 62ch;       /* cap on line length when a section is set to one column */
+}
+
+/* ---- Fonts: drop .woff2 files in /fonts (see fonts/README.md) ---- */
+@font-face {
+  font-family: "Nimbus Sans";
+  src: url("../fonts/NimbusSans-Light.woff2") format("woff2");
+  font-weight: 300;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Nimbus Sans";
+  src: url("../fonts/NimbusSans-Regular.woff2") format("woff2");
+  font-weight: 400;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Nimbus Sans";
+  src: url("../fonts/NimbusSans-Bold.woff2") format("woff2");
+  font-weight: 700;
+  font-display: swap;
+}
+
+/* ---- Base ---- */
+*, *::before, *::after { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font: 300 1rem/1.5 "Nimbus Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  letter-spacing: -0.01em;
+  -webkit-font-smoothing: antialiased;
+}
+
+a { color: var(--accent); text-decoration: none; border-bottom: var(--rule) solid currentColor; }
+a:hover { color: var(--ink); }
+a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+h1, h2, h3, h4 { margin: 0; font-weight: 700; letter-spacing: -0.03em; line-height: 0.95; }
+p { margin: 0 0 var(--unit); }
+
+.meta { margin: 0; font-size: 1rem; letter-spacing: 0.03em; line-height: 1.6; }
+
+.wrap, .page {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding-inline: var(--gutter);
+  white-space: nowrap;
+  text-shrink: per-line font-size; /* Shrinks font-size so the line fits the container */
+}
+
+/* ---- Masthead: meta row, black band with reversed title, meta row ---- */
+.masthead-top, .masthead-sub {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--gutter);
+  padding-block: calc(var(--unit) * 0.75);
+}
+.band {
+  background: var(--ink);
+  color: var(--paper);
+  padding-block: var(--unit) calc(var(--unit) * 1.25);
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+.band h1 {
+  font-size: clamp(3.5rem, 12vw, 9rem);
+  letter-spacing: -0.05em;
+  line-height: 1;
+}
+
+/* ---- Page grid: 12 columns ---- */
+.page {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  column-gap: var(--gutter);
+  padding-bottom: calc(var(--unit) * 4);
+}
+main { grid-column: 1 / -1; display: grid; grid-template-columns: subgrid; }
+
+/* ---- Sections: number in cols 1-3, content in cols 4-12 ---- */
+section {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: subgrid;
+  border-top: var(--rule) solid var(--ink);
+  padding-top: calc(var(--unit) * 0.75);
+  margin-top: calc(var(--unit) * 3);
+}
+.num { grid-column: 1 / 4; font-size: 1rem; letter-spacing: 0; }
+
+/* ---- Content area: 3 columns by default (each = 3 page columns) ----
+   Per section, add a class to .body to change it:
+     <div class="body">           3 columns
+     <div class="body cols-2">    2 columns
+     <div class="body cols-1">    1 column
+   Children of .body:
+     .text     prose that flows through the columns
+     .span-2   spans 2 columns (figures, tables)
+     .span-3   spans every column, edge to edge
+   Narrow screens reduce columns automatically. */
+.body {
+  --cols: 3;
+  grid-column: 4 / -1;
+  display: grid;
+  grid-template-columns: repeat(var(--cols), 1fr);
+  column-gap: var(--gutter);
+  align-content: start;
+}
+.body.cols-2 { --cols: 2; }
+.body.cols-1 { --cols: 1; }
+.body > h3 { grid-column: 1 / -1; font-size: 2.5rem; margin-bottom: calc(var(--unit) * 1.5); }
+.body > * { grid-column: span 1; }
+.body > .span-2 { grid-column: span 2; }
+.body > .span-3 { grid-column: 1 / -1; }
+
+.text { grid-column: 1 / -1; columns: var(--cols); column-gap: var(--gutter); }
+.text p { orphans: 2; widows: 2; }
+.cols-1 .text p { max-width: var(--measure); }
+
+/* ---- Plates (projects): figure spans 2 columns, text 1 ---- */
+.plate {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: subgrid;
+  row-gap: var(--unit);
+  border-top: var(--rule) solid var(--ink);
+  padding-top: var(--unit);
+  margin-bottom: calc(var(--unit) * 2);
+}
+.plate figure { grid-column: span 2; }
+.plate-text { grid-column: span 1; }
+.plate h4 { font-size: 1.5rem; margin-bottom: var(--unit); }
+figure { margin: 0; }
+figure img { display: block; width: 100%; height: auto; }
+/* Photos: high-contrast B&W for a cohesive look */
+figure img.photo { filter: grayscale(1) contrast(1.2); }
+figcaption { font-size: 0.75rem; margin-top: 0.5rem; }
+
+/* ---- Spec tables ---- */
+table { border-collapse: collapse; width: 100%; font-size: 0.875rem; }
+th, td { text-align: left; vertical-align: top; padding: 0.4rem 0; border-top: var(--rule) solid var(--ink); }
+th { width: 6rem; font-weight: 700; }
+tr:last-child th, tr:last-child td { border-bottom: var(--rule) solid var(--ink); }
+
+footer { grid-column: 1 / -1; margin-top: calc(var(--unit) * 4); border-top: var(--rule) solid var(--ink); padding-top: 0.5rem; }
+
+/* ---- Narrower screens: 3 -> 2 -> 1 columns ---- */
+.cols-2 .span-3, .cols-2 .plate figure, .cols-2 .plate-text { grid-column: 1 / -1; }
+.cols-1 .body > *, .cols-1 .plate figure, .cols-1 .plate-text { grid-column: 1 / -1; }
+.body.cols-1 > * { grid-column: 1 / -1; }
+
+@media (max-width: 1000px) {
+  .body:not(.cols-1) { --cols: 2; }
+  .body > .span-3, .plate figure, .plate-text { grid-column: 1 / -1; }
+}
+@media (max-width: 700px) {
+  .body, .body:not(.cols-1), .body.cols-2 { --cols: 1; }
+  .num, .body { grid-column: 1 / -1; }
+  .num { margin-bottom: var(--unit); }
+  .body > *, .body > .span-2, .body > .span-3 { grid-column: 1 / -1; }
+}
+
+@media print {
+  body { background: #fff; }
+}
